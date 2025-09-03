@@ -1,1 +1,1 @@
-# SimpleSwiftCompiler
+# simple-swift-compiler

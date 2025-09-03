@@ -1,0 +1,8 @@
+[package]
+name = "simple-swift-compiler"
+version = "0.1.0"
+edition = "2024"
+authors = ["Satoshi Komatsu<zlia.6.lj.425@gmail.com>"]
+license = "Apache 2.0"
+
+[dependencies]
