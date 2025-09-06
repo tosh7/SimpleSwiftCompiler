@@ -22,4 +22,16 @@ fn main() {
         }
     };
     println!("Source code:\n{}", source);
+
+    match lexer::tokenize(&source) {
+        Ok(tokens) => {
+            println!("Tokens:");
+            for(i, token) in tokens.iter().enumerate() {
+                println!("{}: {:?}", i, token);
+            }
+        }
+        Err(error) => {
+            eprintln!("Lexing error: {}", error);
+        }
+    }
 }
