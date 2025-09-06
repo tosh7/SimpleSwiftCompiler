@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use crate::token::{Token, TokenType};
 
 pub struct Lexer {
