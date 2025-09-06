@@ -2,6 +2,6 @@ pub struct CodeGenerator {
 
 }
 
-impel CodeGenerator {
-    
+impl CodeGenerator {
+
 }
