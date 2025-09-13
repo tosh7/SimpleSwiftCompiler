@@ -1,5 +1,7 @@
 mod lexer;
 mod token;
+mod ast;
+mod parser;
 
 use std::fs;
 use std::env;
@@ -23,15 +25,27 @@ fn main() {
     };
     println!("Source code:\n{}", source);
 
-    match lexer::tokenize(&source) {
+    let tokens = match lexer::tokenize(&source) {
         Ok(tokens) => {
             println!("Tokens:");
             for(i, token) in tokens.iter().enumerate() {
                 println!("{}: {:?}", i, token);
             }
+            tokens
         }
         Err(error) => {
             eprintln!("Lexing error: {}", error);
+            return;
+        }
+    };
+
+    match parser::parse(tokens) {
+        Ok(ast) => {
+            println!("=== AST ===");
+            println!("{:#?}", ast);
+        }
+        Err(error) => {
+            eprintln!("AST error: {}", error);
         }
     }
 }
