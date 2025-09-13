@@ -41,19 +41,38 @@ cargo run example/Test.swift
 This will:
 1. Read the Swift source file
 2. Tokenize the input
-3. Display the source code and tokens
+3. Parse the tokens into an AST
+4. Display the source code, tokens, and AST
 
 ### Example Output
 
 ```
 Source code:
-print(42)
+print(42+1)
 Tokens:
 0: Token { token_type: Print, lexeme: "print" }
 1: Token { token_type: LeftParen, lexeme: "(" }
 2: Token { token_type: Number, lexeme: "42" }
-3: Token { token_type: RightParen, lexeme: ")" }
-4: Token { token_type: EOF, lexeme: "" }
+3: Token { token_type: Plus, lexeme: "+" }
+4: Token { token_type: Number, lexeme: "1" }
+5: Token { token_type: RightParen, lexeme: ")" }
+6: Token { token_type: EOF, lexeme: "" }
+=== AST ===
+Proguram(
+    [
+        Print(
+            Binary {
+                left: Number(
+                    42,
+                ),
+                operator: Add,
+                right: Number(
+                    1,
+                ),
+            },
+        ),
+    ],
+)
 ```
 
 ## Supported Features
@@ -61,7 +80,9 @@ Tokens:
 Currently, the compiler supports:
 - `print` statements
 - Integer literals
-- Basic tokenization
+- Arithmetic expressions (+, -, *, /)
+- Expression parsing with operator precedence
+- Abstract Syntax Tree (AST) generation
 
 ## Requirements
 
