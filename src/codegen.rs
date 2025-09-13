@@ -97,7 +97,7 @@ impl LLVMCodeGenerator {
     fn visit_expression(&mut self, expr: &Expression) -> String {
         match expr {
             Expression::Number(n) => {
-                n.to_string*()
+                n.to_string()
             }
 
             Expression::Binary { left, operator, right } => {

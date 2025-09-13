@@ -2,6 +2,7 @@ mod lexer;
 mod token;
 mod ast;
 mod parser;
+mod codegen;
 
 use std::fs;
 use std::env;
@@ -39,13 +40,20 @@ fn main() {
         }
     };
 
-    match parser::parse(tokens) {
+    let ast = match parser::parse(tokens) {
         Ok(ast) => {
             println!("=== AST ===");
             println!("{:#?}", ast);
+            ast
         }
         Err(error) => {
             eprintln!("AST error: {}", error);
+            return;
         }
-    }
+    };
+
+    let llvm_ir = codegen::generate_llvm(&ast);
+    println!("=== LLVM IR ===");
+    println!("{}", llvm_ir);
+
 }
