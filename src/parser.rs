@@ -56,7 +56,7 @@ impl Parser {
             statements.push(self.parse_statement()?);
         }
 
-        Ok(AstNode::Proguram(statements))
+        Ok(AstNode::Program(statements))
     }
 
     fn parse_statement(&mut self) -> Result<Statement, String> {
@@ -106,7 +106,7 @@ impl Parser {
                 BinaryOperator::Multiply
             } else {
                 self.advance();
-                BinaryOperator::Devide
+                BinaryOperator::Divide
             };
 
             let right = self.parse_primary()?;

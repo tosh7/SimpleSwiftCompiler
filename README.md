@@ -58,7 +58,7 @@ Tokens:
 5: Token { token_type: RightParen, lexeme: ")" }
 6: Token { token_type: EOF, lexeme: "" }
 === AST ===
-Proguram(
+Program(
     [
         Print(
             Binary {
