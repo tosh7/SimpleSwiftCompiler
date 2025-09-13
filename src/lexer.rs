@@ -87,6 +87,22 @@ impl Lexer {
                     self.advance();
                     Ok(Token::new(TokenType::RightParen, ")".to_string()))
                 }
+                '+' => {
+                    self.advance();
+                    Ok(Token::new(TokenType::Plus, "+".to_string()))
+                }
+                '-' => {
+                    self.advance();
+                    Ok(Token::new(TokenType::Minus, "-".to_string()))
+                }
+                '*' => {
+                    self.advance();
+                    Ok(Token::new(TokenType::Star, "*".to_string()))
+                }
+                '/' => {
+                    self.advance();
+                    Ok(Token::new(TokenType::Slash, "/".to_string()))
+                }
                 '0'..='9' => {
                     let number = self.read_number();
                     Ok(Token::new(TokenType::Number, number))

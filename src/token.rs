@@ -5,6 +5,10 @@ pub enum TokenType {
     LeftParen, // (
     RightParen, // )
     EOF,
+    Plus,
+    Minus,
+    Star,
+    Slash,
 }
 
 #[derive(Debug, Clone)]
