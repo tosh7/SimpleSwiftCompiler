@@ -71,7 +71,61 @@ impl LLVMCodeGenerator {
 
     fn visit_node(&mut self, node: &AstNode) {
         match node {
-            AstNode::Program
+            AstNode::Program(statements) => {
+                for statement in statements {
+                    self.visit_statement(statement);
+                }
+            }
         }
     }
+
+    fn visit_statement(&mut self, statement: &Statement) {
+        match statement {
+            Statement::Print(expr) => {
+                let result_reg = self.visit_expression(expr);
+
+                let call_reg = self.alloc_register();
+                self.emit_indent();
+                self.emit(&format!(
+                    "{} = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str, i32 0, i32 0), i32 {})\n",
+                    call_reg, result_reg
+                ));
+            }
+        }
+    }
+
+    fn visit_expression(&mut self, expr: &Expression) -> String {
+        match expr {
+            Expression::Number(n) => {
+                n.to_string*()
+            }
+
+            Expression::Binary { left, operator, right } => {
+                let left_reg = self.visit_expression(left);
+                let right_reg = self.visit_expression(right);
+
+                let result_reg = self.alloc_register();
+
+                let op_instruction = match operator {
+                    BinaryOperator::Add => "add",
+                    BinaryOperator::Subtract => "sub",
+                    BinaryOperator::Multiply => "mul",
+                    BinaryOperator::Divide => "sdiv",  // 符号付き除算
+                };
+
+                self.emit_indent();
+                self.emit(&format!(
+                    "{} = {} i32 {}, {}\n",
+                    result_reg, op_instruction, left_reg, right_reg
+                ));
+
+                result_reg
+            }
+        }
+    }
+}
+
+pub fn generate_llvm(ast: &AstNode) -> String {
+    let mut generator = LLVMCodeGenerator::new();
+    generator.generate(ast)
 }
