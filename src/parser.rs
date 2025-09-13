@@ -1,5 +1,5 @@
-use create::token::{Token, TokenType};
-use create::ast::{AstNode, Statement, Expression, BinaryOperator};
+use crate::token::{Token, TokenType};
+use crate::ast::{AstNode, Statement, Expression, BinaryOperator};
 
 pub struct Parser {
     tokens: Vec<Token>,
@@ -24,7 +24,7 @@ impl Parser {
         if self.is_at_end() {
             false
         } else {
-            self.peek().token_type == token_type
+            self.peak().token_type == token_type
         }
     }
 
@@ -82,7 +82,7 @@ impl Parser {
                 self.advance();
                 BinaryOperator::Add
             } else {
-                self.advance()?;
+                self.advance();
                 BinaryOperator::Subtract
             };
 
@@ -90,7 +90,7 @@ impl Parser {
             left = Expression::Binary {
                 left: Box::new(left),
                 operator,
-                right: Box(right),
+                right: Box::new(right),
             };
         }
 
@@ -105,7 +105,7 @@ impl Parser {
                 self.advance();
                 BinaryOperator::Multiply
             } else {
-                self.advance()?;
+                self.advance();
                 BinaryOperator::Devide
             };
 
@@ -113,7 +113,7 @@ impl Parser {
             left = Expression::Binary {
                 left: Box::new(left),
                 operator,
-                right: Box(right),
+                right: Box::new(right),
             };
         }
 
@@ -123,23 +123,23 @@ impl Parser {
     fn parse_primary(&mut self) -> Result<Expression, String> {
         if self.check(TokenType::Number) {
             let token = self.advance();
-            let value = token.lexeme.parse<i64>()
+            let value = token.lexeme.parse::<i64>()
                 .map_err(|_| format!("数値の解析に失敗: {}", token.lexeme))?;
-            Ok(Expression::Number(value));
+            return Ok(Expression::Number(value));
         }
 
         if self.check(TokenType::LeftParen) {
             self.advance();
             let expr = self.parse_expression()?;
             self.consume(TokenType::RightParen, "')' is required")?;
-            Ok(expr);
+            return Ok(expr);
         }
 
-        Err(format!("expression is expected: {:?}", self.peek()))
+        Err(format!("expression is expected: {:?}", self.peak()))
     }
+}
 
-    pub fn parse(tokens: Vec<Token>) -> Result<AstNode, String> {
-        let mut parser = Parser::new(tokens);
-        parser.parse()
-    }
+pub fn parse(tokens: Vec<Token>) -> Result<AstNode, String> {
+    let mut parser = Parser::new(tokens);
+    parser.parse()
 }
