@@ -1,6 +1,6 @@
 #[derive(Debug, Clone, PartialEq)]
 pub enum AstNode {
-    Proguram(Vec<Statement>)
+    Program(Vec<Statement>)
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -23,5 +23,5 @@ pub enum BinaryOperator {
     Add,
     Subtract,
     Multiply,
-    Devide,
+    Divide,
 }
