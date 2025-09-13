@@ -73,4 +73,73 @@ impl Parser {
     fn parse_expression(&mut self) -> Result<Expression, String> {
         self.parse_additive()
     }
+
+    fn parse_additive(&mut self) -> Result<Expression, String> {
+        let mut left = self.parse_multiplicative()?;
+
+        while self.check(TokenType::Plus) || self.check(TokenType::Minus) {
+            let operator = if self.check(TokenType::Plus) {
+                self.advance();
+                BinaryOperator::Add
+            } else {
+                self.advance()?;
+                BinaryOperator::Subtract
+            };
+
+            let right = self.parse_multiplicative()?;
+            left = Expression::Binary {
+                left: Box::new(left),
+                operator,
+                right: Box(right),
+            };
+        }
+
+        Ok(left)
+    }
+
+    fn parse_multiplicative(&mut self) -> Result<Expression, String> {
+        let mut left = self.parse_primary()?;
+
+        while self.check(TokenType::Star) || self.check(TokenType::Slash) {
+            let operator = if self.check(TokenType::Star) {
+                self.advance();
+                BinaryOperator::Multiply
+            } else {
+                self.advance()?;
+                BinaryOperator::Devide
+            };
+
+            let right = self.parse_primary()?;
+            left = Expression::Binary {
+                left: Box::new(left),
+                operator,
+                right: Box(right),
+            };
+        }
+
+        Ok(left)
+    }
+
+    fn parse_primary(&mut self) -> Result<Expression, String> {
+        if self.check(TokenType::Number) {
+            let token = self.advance();
+            let value = token.lexeme.parse<i64>()
+                .map_err(|_| format!("数値の解析に失敗: {}", token.lexeme))?;
+            Ok(Expression::Number(value));
+        }
+
+        if self.check(TokenType::LeftParen) {
+            self.advance();
+            let expr = self.parse_expression()?;
+            self.consume(TokenType::RightParen, "')' is required")?;
+            Ok(expr);
+        }
+
+        Err(format!("expression is expected: {:?}", self.peek()))
+    }
+
+    pub fn parse(tokens: Vec<Token>) -> Result<AstNode, String> {
+        let mut parser = Parser::new(tokens);
+        parser.parse()
+    }
 }
