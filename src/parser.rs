@@ -124,7 +124,7 @@ impl Parser {
         if self.check(TokenType::Number) {
             let token = self.advance();
             let value = token.lexeme.parse::<i64>()
-                .map_err(|_| format!("数値の解析に失敗: {}", token.lexeme))?;
+                .map_err(|_| format!("Failed to parse number: {}", token.lexeme))?;
             return Ok(Expression::Number(value));
         }
 
