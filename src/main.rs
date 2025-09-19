@@ -57,28 +57,36 @@ fn main() {
     println!("=== LLVM IR ===");
     println!("{}", llvm_ir);
 
-    let ll_file = "output.ll";
-    fs::write(ll_file, &llvm_ir)
+    // Create output directory
+    let output_dir = "target/llvm";
+    fs::create_dir_all(output_dir)
+        .expect("Failed to create output directory");
+    
+    let ll_file = format!("{}/output.ll", output_dir);
+    let s_file = format!("{}/output.s", output_dir);
+    let exec_file = format!("{}/output", output_dir);
+    
+    fs::write(&ll_file, &llvm_ir)
         .expect("Failed to write output file");
     
     println!("=== LLVM IR saved to {} ===\n", ll_file);
     
     // Execute with LLVM toolchain (if installed)
     if let Ok(_) = Command::new("lli").output() {
-        compile_and_run_llvm(ll_file);
+        compile_and_run_llvm(&ll_file, &s_file, &exec_file);
     } else {
         println!("Cannot execute: LLVM toolchain is not installed");
         println!("You can execute with the following commands:");
         println!("  lli {}", ll_file);
         println!("or");
-        println!("  llc {} -o output.s", ll_file);
-        println!("  clang output.s -o output");
-        println!("  ./output");
+        println!("  llc {} -o {}", ll_file, s_file);
+        println!("  clang {} -o {}", s_file, exec_file);
+        println!("  {}", exec_file);
     }
 
 }
 
-fn compile_and_run_llvm(ll_file: &str) {
+fn compile_and_run_llvm(ll_file: &str, s_file: &str, exec_file: &str) {
     println!("=== LLVM Execution ===");
     
     // Execute directly with lli (LLVM interpreter)
@@ -100,20 +108,20 @@ fn compile_and_run_llvm(ll_file: &str) {
     
     // LLVM IR → Assembly
     if let Ok(_) = Command::new("llc")
-        .args(&[ll_file, "-o", "output.s"])
+        .args(&[ll_file, "-o", s_file])
         .output() 
     {
-        println!("Generated assembly file: output.s");
+        println!("Generated assembly file: {}", s_file);
         
         // Assembly → Executable
         if let Ok(_) = Command::new("clang")
-            .args(&["output.s", "-o", "output"])
+            .args(&[s_file, "-o", exec_file])
             .output()
         {
-            println!("Generated executable: output");
+            println!("Generated executable: {}", exec_file);
             
             // Execute
-            if let Ok(output) = Command::new("./output").output() {
+            if let Ok(output) = Command::new(exec_file).output() {
                 println!("Native execution result: {}", 
                     String::from_utf8_lossy(&output.stdout));
             }
