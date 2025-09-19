@@ -1,1 +1,5 @@
-print(42+1)
+print(42)
+print(42+2)
+print(42-2)
+print(42*2)
+print(42/2)
