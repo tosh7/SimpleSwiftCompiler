@@ -15,16 +15,21 @@ A simple Swift compiler implementation written in Rust. This project implements 
 ```
 simple-swift-compiler/
 ├── src/
-│   ├── main.rs      # Entry point
-│   ├── lexer.rs     # Lexical analyzer
-│   ├── token.rs     # Token definitions
-│   ├── parser.rs    # Parser implementation
-│   ├── ast.rs       # AST node definitions
-│   ├── semantic.rs  # Semantic analyzer
-│   └── codegen.rs   # Code generation
+│   ├── main.rs          # Entry point
+│   ├── compiler.rs      # Main compiler orchestrator
+│   ├── lexer.rs         # Lexical analyzer
+│   ├── token.rs         # Token definitions
+│   ├── parser.rs        # Parser implementation
+│   ├── ast.rs           # AST node definitions
+│   ├── codegen.rs       # LLVM IR code generation
+│   └── llvm_backend.rs  # LLVM backend implementation
 ├── example/
-│   └── Test.swift   # Example Swift code
-└── Cargo.toml       # Project configuration
+│   └── Test.swift       # Example Swift code
+├── target/llvm/         # Generated LLVM IR files
+│   ├── output.ll        # LLVM IR output
+│   ├── output.s         # Assembly output (optional)
+│   └── output           # Executable (optional)
+└── Cargo.toml           # Project configuration
 ```
 
 ## Building the Project
@@ -41,41 +46,47 @@ cargo run example/Test.swift
 
 This will:
 1. Read the Swift source file
-2. Tokenize the input  
-3. Parse the tokens into an AST
-4. Generate LLVM IR code
-5. Execute the code using LLVM toolchain
-6. Optionally compile to native executable
+2. Tokenize the input (Frontend: Lexical Analysis)
+3. Parse the tokens into an AST (Frontend: Syntax Analysis)
+4. Generate LLVM IR code (Frontend: IR Generation)
+5. Save LLVM IR to `target/llvm/output.ll`
+6. Execute the code using LLVM toolchain (if installed)
 
 ### Example Output
 
+For the input file `example/Test.swift`:
+```swift
+print(42)
+print(42+2)
+print(42-2)
+print(42*2)
+print(42/2)
+```
+
+The compiler outputs:
 ```
 Source code:
-print(42+1)
+print(42)
+print(42+2)
+print(42-2)
+print(42*2)
+print(42/2)
+
 Tokens:
 0: Token { token_type: Print, lexeme: "print" }
 1: Token { token_type: LeftParen, lexeme: "(" }
 2: Token { token_type: Number, lexeme: "42" }
-3: Token { token_type: Plus, lexeme: "+" }
-4: Token { token_type: Number, lexeme: "1" }
-5: Token { token_type: RightParen, lexeme: ")" }
-6: Token { token_type: EOF, lexeme: "" }
+...
+
 === AST ===
-Program(
-    [
-        Print(
-            Binary {
-                left: Number(
-                    42,
-                ),
-                operator: Add,
-                right: Number(
-                    1,
-                ),
-            },
-        ),
-    ],
-)
+Program([
+    Print(Number(42)),
+    Print(Binary { left: Number(42), operator: Add, right: Number(2) }),
+    Print(Binary { left: Number(42), operator: Subtract, right: Number(2) }),
+    Print(Binary { left: Number(42), operator: Multiply, right: Number(2) }),
+    Print(Binary { left: Number(42), operator: Divide, right: Number(2) }),
+])
+
 === LLVM IR ===
 ; ModuleID = 'swift_module'
 source_filename = "swift_source"
@@ -86,20 +97,26 @@ declare i32 @printf(i8*, ...)
 
 define i32 @main() {
 entry:
-  %1 = add i32 42, 1
-  %2 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str, i32 0, i32 0), i32 %1)
+  %1 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str, i32 0, i32 0), i32 42)
+  %2 = add i32 42, 2
+  %3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str, i32 0, i32 0), i32 %2)
+  %4 = sub i32 42, 2
+  %5 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str, i32 0, i32 0), i32 %4)
+  %6 = mul i32 42, 2
+  %7 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str, i32 0, i32 0), i32 %6)
+  %8 = sdiv i32 42, 2
+  %9 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str, i32 0, i32 0), i32 %8)
   ret i32 0
 }
 
-=== LLVM IR saved to output.ll ===
+=== LLVM IR saved to target/llvm/output.ll ===
 
-=== LLVM Execution ===
-Execution result: 43
-
-=== Native Code Compilation (Optional) ===
-Generated assembly file: output.s
-Generated executable: output
-Native execution result: 43
+Execution result (with LLVM):
+42
+44
+40
+84
+21
 ```
 
 ## Supported Features
@@ -113,9 +130,9 @@ Currently, the compiler supports:
 
 ## Requirements
 
-- Rust 1.56 or later (Edition 2024)
+- Rust 1.56 or later
 - Cargo
-- LLVM toolchain (for code execution)
+- LLVM toolchain (optional, for code execution)
 
 ### Installing LLVM on macOS
 
@@ -140,12 +157,31 @@ To check for compilation errors without building:
 cargo check
 ```
 
+## Architecture
+
+The compiler follows a modular architecture:
+
+1. **Frontend (Source → LLVM IR)**:
+   - `lexer.rs`: Converts source code into tokens
+   - `parser.rs`: Builds AST from tokens with operator precedence
+   - `codegen.rs`: Generates LLVM IR from AST
+
+2. **Backend (LLVM IR → Execution)**:
+   - `llvm_backend.rs`: Handles LLVM toolchain interaction
+   - Saves IR to files
+   - Executes via LLVM interpreter (lli)
+   - Can compile to native code (llc + clang)
+
+3. **Orchestration**:
+   - `compiler.rs`: Coordinates the compilation pipeline
+   - `main.rs`: CLI interface
+
 ## Generated Files
 
 When you run the compiler, it generates:
-- `output.ll` - LLVM IR code
-- `output.s` - Assembly code (optional)
-- `output` - Native executable (optional)
+- `target/llvm/output.ll` - LLVM IR code
+- `target/llvm/output.s` - Assembly code (when using llc)
+- `target/llvm/output` - Native executable (when using clang)
 
 ## License
 
