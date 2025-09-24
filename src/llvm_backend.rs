@@ -14,9 +14,6 @@ impl LLVMCompiler {
   }
 
   pub fn compile_to_executable(&self, llvm_ir: &str, output: &str) -> Result<(), &str> {
-    println!("=== LLVM IR ===");
-    println!("{}", llvm_ir);
-
     // Create output directory
     let output_dir = "target/llvm";
     fs::create_dir_all(output_dir)
