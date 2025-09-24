@@ -1,12 +1,9 @@
-mod lexer;
-mod token;
-mod ast;
-mod parser;
-mod codegen;
-mod llvm_backend;
-
-use llvm_backend::LLVMCompiler;
-use std::process::Command;
+use crate::lexer;
+use crate::token;
+use crate::ast;
+use crate::parser;
+use crate::codegen;
+use crate::llvm_backend::LLVMCompiler;
 
 pub struct Compiler {
     backend: LLVMCompiler,
@@ -54,5 +51,6 @@ impl Compiler {
         // backend
         // llvm compiler
         self.backend.compile_to_executable(&llvm_ir, "output")
+            .map_err(|e| e.to_string())
     }
 }
