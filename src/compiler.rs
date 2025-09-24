@@ -1,8 +1,6 @@
-use crate::lexer;
-use crate::token;
-use crate::ast;
-use crate::parser;
 use crate::codegen;
+use crate::lexer;
+use crate::parser;
 use crate::llvm_backend::LLVMCompiler;
 
 pub struct Compiler {

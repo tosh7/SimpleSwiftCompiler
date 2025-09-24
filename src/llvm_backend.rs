@@ -1,19 +1,18 @@
 use std::fs;
-use std::process;
 use std::process::Command;
 
 pub struct LLVMCompiler {
-    output_dir: String,
+    _output_dir: String,
 }
 
 impl LLVMCompiler {
   pub fn new() -> Self {
     LLVMCompiler {
-      output_dir: "target/llvm".to_string()
+      _output_dir: "target/llvm".to_string()
     }
   }
 
-  pub fn compile_to_executable(&self, llvm_ir: &str, output: &str) -> Result<(), &str> {
+  pub fn compile_to_executable(&self, llvm_ir: &str, _output: &str) -> Result<(), &str> {
     // Create output directory
     let output_dir = "target/llvm";
     fs::create_dir_all(output_dir)

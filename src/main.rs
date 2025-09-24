@@ -31,5 +31,8 @@ fn main() {
     println!("Source code:\n{}", source);
 
     let compiler = Compiler::new();
-    compiler.compile(&source);
+    if let Err(e) = compiler.compile(&source) {
+        eprintln!("Compilation error: {}", e);
+        process::exit(1);
+    }
 }
