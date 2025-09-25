@@ -20,7 +20,19 @@ fn main() {
         process::exit(1);
     }
 
-    let filename = &args[1];
+    let mut filename= None;
+    for arg in args.iter().skip(1) {
+        if arg == "--verbose" || arg == "-v" {
+            // verbose option on
+        } else if !arg.starts_with('-') {
+            filename = Some(arg);
+        }
+    }
+
+    let Some(filename) = filename else {
+        eprintln!("Usage: {} <source-file>", args[0]);
+        process::exit(1);
+    };
     let source = match fs::read_to_string(filename) {
         Ok(content) => content,
         Err(error) => {
