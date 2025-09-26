@@ -5,11 +5,13 @@ mod ast;
 mod parser;
 mod codegen;
 mod llvm_backend;
+mod options;
 
 use std::fs;
 use std::env;
 use std::process;
 
+use crate::options::CompilerOption;
 use crate::compiler::Compiler;
 
 fn main() {
@@ -21,13 +23,19 @@ fn main() {
     }
 
     let mut filename= None;
+    let mut options: Vec<CompilerOption> = Vec::new();
     for arg in args.iter().skip(1) {
-        if arg == "--verbose" || arg == "-v" {
+        if arg.starts_with('-') {
             // verbose option on
-        } else if !arg.starts_with('-') {
+            if let Some(option) = CompilerOption::from_literal(&arg) {
+                options.push(option);
+            }
+        } else {
             filename = Some(arg);
         }
     }
+
+    print!("{:?}", options);
 
     let Some(filename) = filename else {
         eprintln!("Usage: {} <source-file>", args[0]);
