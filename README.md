@@ -9,20 +9,22 @@ A simple Swift compiler implementation written in Rust. This project implements 
 - **LLVM Code Generator**: Generates LLVM IR from the AST
 - **Native Execution**: Compiles and executes code via LLVM toolchain
 - **Arithmetic Operations**: Supports basic math operations (+, -, *, /)
+- **Command-line Options**: Verbose mode for detailed compilation output
 
 ## Project Structure
 
 ```
 simple-swift-compiler/
 ├── src/
-│   ├── main.rs          # Entry point
+│   ├── main.rs          # Entry point and CLI argument parsing
 │   ├── compiler.rs      # Main compiler orchestrator
 │   ├── lexer.rs         # Lexical analyzer
 │   ├── token.rs         # Token definitions
 │   ├── parser.rs        # Parser implementation
 │   ├── ast.rs           # AST node definitions
 │   ├── codegen.rs       # LLVM IR code generation
-│   └── llvm_backend.rs  # LLVM backend implementation
+│   ├── llvm_backend.rs  # LLVM backend implementation
+│   └── options.rs       # Compiler options and flags
 ├── example/
 │   └── Test.swift       # Example Swift code
 ├── target/llvm/         # Generated LLVM IR files
@@ -40,9 +42,25 @@ cargo build
 
 ## Running the Compiler
 
+### Basic Usage
+
 ```bash
-cargo run example/Test.swift
+cargo run -- example/Test.swift
 ```
+
+### Verbose Mode
+
+For detailed compilation output including tokens, AST, and LLVM IR:
+
+```bash
+cargo run -- --verbose example/Test.swift
+# or
+cargo run -- -v example/Test.swift
+```
+
+### Command-line Options
+
+- `--verbose` or `-v`: Enable verbose output showing all compilation stages
 
 This will:
 1. Read the Swift source file
