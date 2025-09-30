@@ -1,14 +1,17 @@
 use std::fs;
 use std::process::Command;
+use crate::options::CompilerOption;
 
 pub struct LLVMCompiler {
     _output_dir: String,
+    options: Vec<CompilerOption>,
 }
 
 impl LLVMCompiler {
-  pub fn new() -> Self {
+  pub fn new(options:Vec<CompilerOption>) -> Self {
     LLVMCompiler {
-      _output_dir: "target/llvm".to_string()
+      _output_dir: "target/llvm".to_string(),
+      options: options,
     }
   }
 
@@ -25,32 +28,36 @@ impl LLVMCompiler {
     fs::write(&ll_file, &llvm_ir)
         .expect("Failed to write output file");
     
-    println!("=== LLVM IR saved to {} ===\n", ll_file);
+    if self.options.contains(&CompilerOption::Verbose) {
+        println!("=== LLVM IR saved to {} ===\n", ll_file);
+    }
     
     // Execute with LLVM toolchain (if installed)
     if let Ok(_) = Command::new("lli").output() {
-        Self::compile_and_run_llvm(&ll_file, &s_file, &exec_file);
+        Self::compile_and_run_llvm(self, &ll_file, &s_file, &exec_file);
         Ok(())
     } else {
-        println!("Cannot execute: LLVM toolchain is not installed");
-        println!("You can execute with the following commands:");
-        println!("  lli {}", ll_file);
-        println!("or");
-        println!("  llc {} -o {}", ll_file, s_file);
-        println!("  clang {} -o {}", s_file, exec_file);
-        println!("  {}", exec_file);
+        eprintln!("Cannot execute: LLVM toolchain is not installed");
+        eprintln!("You can execute with the following commands:");
+        eprintln!("  lli {}", ll_file);
+        eprintln!("or");
+        eprintln!("  llc {} -o {}", ll_file, s_file);
+        eprintln!("  clang {} -o {}", s_file, exec_file);
+        eprintln!("  {}", exec_file);
         Err("LLVM toolchain not installed. Please install LLVM to execute the generated code.")
     }
   }
 
-  fn compile_and_run_llvm(ll_file: &str, s_file: &str, exec_file: &str) {
+  fn compile_and_run_llvm(&self, ll_file: &str, s_file: &str, exec_file: &str) {
     println!("=== LLVM Execution ===");
     
     // Execute directly with lli (LLVM interpreter)
     match Command::new("lli").arg(ll_file).output() {
         Ok(output) => {
-            print!("Execution result: ");
-            print!("{}", String::from_utf8_lossy(&output.stdout));
+            if self.options.contains(&CompilerOption::Verbose) {
+                print!("Execution result: ");
+                print!("{}", String::from_utf8_lossy(&output.stdout));
+            }
             if !output.stderr.is_empty() {
                 eprintln!("Error: {}", String::from_utf8_lossy(&output.stderr));
             }
@@ -61,21 +68,27 @@ impl LLVMCompiler {
     }
     
     // Or compile to native code
-    println!("\n=== Native Code Compilation (Optional) ===");
+    if self.options.contains(&CompilerOption::Verbose) {
+        println!("\n=== Native Code Compilation (Optional) ===");
+    }
     
     // LLVM IR → Assembly
     if let Ok(_) = Command::new("llc")
         .args(&[ll_file, "-o", s_file])
         .output() 
     {
-        println!("Generated assembly file: {}", s_file);
+        if self.options.contains(&CompilerOption::Verbose) {
+            println!("Generated assembly file: {}", s_file);
+        }
         
         // Assembly → Executable
         if let Ok(_) = Command::new("clang")
             .args(&[s_file, "-o", exec_file])
             .output()
         {
-            println!("Generated executable: {}", exec_file);
+            if self.options.contains(&CompilerOption::Verbose) {
+                println!("Generated executable: {}", exec_file);
+            }
             
             // Execute
             if let Ok(output) = Command::new(exec_file).output() {

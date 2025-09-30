@@ -35,8 +35,6 @@ fn main() {
         }
     }
 
-    print!("{:?}", options);
-
     let Some(filename) = filename else {
         eprintln!("Usage: {} <source-file>", args[0]);
         process::exit(1);
@@ -50,7 +48,7 @@ fn main() {
     };
     println!("Source code:\n{}", source);
 
-    let compiler = Compiler::new();
+    let compiler = Compiler::new(options);
     if let Err(e) = compiler.compile(&source) {
         eprintln!("Compilation error: {}", e);
         process::exit(1);

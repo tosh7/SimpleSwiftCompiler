@@ -2,15 +2,18 @@ use crate::codegen;
 use crate::lexer;
 use crate::parser;
 use crate::llvm_backend::LLVMCompiler;
+use crate::options::CompilerOption;
 
 pub struct Compiler {
     backend: LLVMCompiler,
+    options: Vec<CompilerOption>,
 }
 
 impl Compiler {
-    pub fn new() -> Self {
+    pub fn new(options: Vec<CompilerOption>) -> Self {
         Compiler {
-            backend: LLVMCompiler::new(),
+            backend: LLVMCompiler::new(options.clone()),
+            options: options,
         }
     }
 
@@ -19,9 +22,11 @@ impl Compiler {
         // token
         let tokens = match lexer::tokenize(&source) {
             Ok(tokens) => {
-                println!("Tokens:");
-                for(i, token) in tokens.iter().enumerate() {
-                    println!("{}: {:?}", i, token);
+                if self.options.contains(&CompilerOption::Verbose) {
+                    println!("Tokens:");
+                    for(i, token) in tokens.iter().enumerate() {
+                        println!("{}: {:?}", i, token);
+                    }
                 }
                 tokens
             }
@@ -33,8 +38,10 @@ impl Compiler {
         // ast
         let ast = match parser::parse(tokens) {
             Ok(ast) => {
-                println!("=== AST ===");
-                println!("{:#?}", ast);
+                if self.options.contains(&CompilerOption::Verbose) {
+                    println!("=== AST ===");
+                    println!("{:#?}", ast);
+                }
                 ast
             }
             Err(error) => {
@@ -43,8 +50,10 @@ impl Compiler {
             }
         };
         let llvm_ir = codegen::generate_llvm(&ast);
-        println!("=== LLVM IR ===");
-        println!("{}", llvm_ir);
+        if self.options.contains(&CompilerOption::Verbose) {
+            println!("=== LLVM IR ===");
+            println!("{}", llvm_ir);
+        }
         
         // backend
         // llvm compiler
