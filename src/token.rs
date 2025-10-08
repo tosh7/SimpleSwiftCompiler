@@ -9,6 +9,10 @@ pub enum TokenType {
     Minus,
     Star,
     Slash,
+    Let,
+    Assign, // =
+    Colon, // :
+    Identifier,
 }
 
 #[derive(Debug, Clone)]
