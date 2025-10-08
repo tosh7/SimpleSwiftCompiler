@@ -103,6 +103,14 @@ impl Lexer {
                     self.advance();
                     Ok(Token::new(TokenType::Slash, "/".to_string()))
                 }
+                ':' => {
+                    self.advance();
+                    Ok(Token::new(TokenType::Colon, "/".to_string()))
+                }
+                '=' => {
+                    self.advance();
+                    Ok(Token::new(TokenType::Assign, "/".to_string()))
+                }
                 '0'..='9' => {
                     let number = self.read_number();
                     Ok(Token::new(TokenType::Number, number))
@@ -110,10 +118,16 @@ impl Lexer {
                 'a'..='z' | 'A' ..= 'Z' => {
                     let identifier = self.read_identifier();
 
-                    if identifier == "print" {
-                        Ok(Token::new(TokenType::Print, identifier))
-                    } else {
-                        Err(format!("unknown identifier: {}", identifier))
+                    match identifier.as_str() {
+                        "print" => {
+                            Ok(Token::new(TokenType::Print, identifier))
+                        }
+                        "let" => {
+                            Ok(Token::new(TokenType::Let, identifier))
+                        }
+                        _ => {
+                            Ok(Token::new(TokenType::Identifier, identifier))
+                        }
                     }
                 }
                 _ => Err(format!("unexpected character: {}", ch)),
