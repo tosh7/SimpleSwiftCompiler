@@ -91,6 +91,15 @@ impl LLVMCodeGenerator {
                     call_reg, result_reg
                 ));
             }
+            Statement::VarDecl { name, value, is_mutable } => {
+                // TODO: Implement variable declaration
+            }
+            Statement::Assignment { name, value } => {
+                // TODO: Implement variable assignment
+            }
+            Statement::Expression(expr) => {
+                // TODO
+            }
         }
     }
 
@@ -99,7 +108,10 @@ impl LLVMCodeGenerator {
             Expression::Number(n) => {
                 n.to_string()
             }
-
+            Expression::Variable(name) => {
+                // TODO: Implement variable reference properly
+                "".to_string()
+            }
             Expression::Binary { left, operator, right } => {
                 let left_reg = self.visit_expression(left);
                 let right_reg = self.visit_expression(right);

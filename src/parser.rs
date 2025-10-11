@@ -60,6 +60,17 @@ impl Parser {
     }
 
     fn parse_statement(&mut self) -> Result<Statement, String> {
+        match self.peak().token_type {
+            TokenType::Print => {
+                self.parse_print()
+            }
+            _ => {
+                Err("Unexpected token in statement".to_string())
+            }
+        }
+    }   
+
+    fn parse_print(&mut self) -> Result<Statement, String> {
         self.consume(TokenType::Print, "Expected 'print' keyword")?;
         self.consume(TokenType::LeftParen, "Expected '(' after 'print'")?;
 
