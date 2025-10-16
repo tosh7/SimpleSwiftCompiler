@@ -64,11 +64,43 @@ impl Parser {
             TokenType::Print => {
                 self.parse_print()
             }
+            TokenType::Let => {
+                self.parse_declaration()
+            }
             _ => {
                 Err("Unexpected token in statement".to_string())
             }
         }
-    }   
+    }
+
+    fn parse_declaration(&mut self) -> Result<Statement, String> {
+        self.consume(TokenType::Let, "Expected 'let' keyword")?;
+
+        // Get variable name
+        let name_token = self.consume(TokenType::Identifier, "Expected variable name")?;
+        let name = name_token.lexeme;
+
+        // Skip optional type annotation for now (: Type)
+        if self.check(TokenType::Colon) {
+            self.advance(); // consume ':'
+            // For now, skip the type identifier
+            if self.check(TokenType::Identifier) {
+                self.advance(); // consume type name
+            }
+        }
+
+        // Expect assignment
+        self.consume(TokenType::Assign, "Expected '=' in variable declaration")?;
+
+        // Parse the value expression
+        let value = self.parse_expression()?;
+
+        Ok(Statement::VarDecl {
+            name,
+            value,
+            is_mutable: false,  // 'let' is immutable
+        })
+    }
 
     fn parse_print(&mut self) -> Result<Statement, String> {
         self.consume(TokenType::Print, "Expected 'print' keyword")?;

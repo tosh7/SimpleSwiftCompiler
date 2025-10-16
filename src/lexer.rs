@@ -105,11 +105,11 @@ impl Lexer {
                 }
                 ':' => {
                     self.advance();
-                    Ok(Token::new(TokenType::Colon, "/".to_string()))
+                    Ok(Token::new(TokenType::Colon, ":".to_string()))
                 }
                 '=' => {
                     self.advance();
-                    Ok(Token::new(TokenType::Assign, "/".to_string()))
+                    Ok(Token::new(TokenType::Assign, "=".to_string()))
                 }
                 '0'..='9' => {
                     let number = self.read_number();
