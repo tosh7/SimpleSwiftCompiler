@@ -171,6 +171,11 @@ impl Parser {
             return Ok(Expression::Number(value));
         }
 
+        if self.check(TokenType::Identifier) {
+            let token = self.advance();
+            return Ok(Expression::Variable(token.lexeme));
+        }
+
         if self.check(TokenType::LeftParen) {
             self.advance();
             let expr = self.parse_expression()?;
