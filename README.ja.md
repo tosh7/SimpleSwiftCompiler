@@ -13,29 +13,6 @@ Rustで実装されたシンプルなSwiftコンパイラです。このプロ�
 - **変数参照**: 式内での宣言済み変数の使用
 - **コマンドラインオプション**: 詳細なコンパイル出力のためのverboseモード
 
-## プロジェクト構成
-
-```
-simple-swift-compiler/
-├── src/
-│   ├── main.rs          # エントリポイント、CLI引数解析
-│   ├── compiler.rs      # メインコンパイラオーケストレータ
-│   ├── lexer.rs         # 字句解析器
-│   ├── token.rs         # トークン定義
-│   ├── parser.rs        # パーサー実装
-│   ├── ast.rs           # ASTノード定義
-│   ├── codegen.rs       # LLVM IRコード生成
-│   ├── llvm_backend.rs  # LLVMバックエンド実装
-│   └── options.rs       # コンパイラオプションとフラグ
-├── example/
-│   └── Test.swift       # サンプルSwiftコード
-├── target/llvm/         # 生成されたLLVM IRファイル
-│   ├── output.ll        # LLVM IR出力
-│   ├── output.s         # アセンブリ出力（オプション）
-│   └── output           # 実行可能ファイル（オプション）
-└── Cargo.toml           # プロジェクト設定
-```
-
 ## ビルド方法
 
 ```bash

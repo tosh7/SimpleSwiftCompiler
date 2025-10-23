@@ -13,30 +13,6 @@ A simple Swift compiler implementation written in Rust. This project implements 
 - **Variable References**: Use declared variables in expressions
 - **Command-line Options**: Verbose mode for detailed compilation output
 
-## Project Structure
-
-```
-simple-swift-compiler/
-├── src/
-│   ├── main.rs          # Entry point and CLI argument parsing
-│   ├── compiler.rs      # Main compiler orchestrator
-│   ├── lexer.rs         # Lexical analyzer
-│   ├── token.rs         # Token definitions
-│   ├── parser.rs        # Parser implementation
-│   ├── ast.rs           # AST node definitions
-│   ├── codegen.rs       # LLVM IR code generation
-│   ├── llvm_backend.rs  # LLVM backend implementation
-│   └── options.rs       # Compiler options and flags
-├── example/
-│   ├── ArithmeticOperators.swift  # Arithmetic operations example
-│   └── VariablesAssigment.swift   # Variable declaration example
-├── target/llvm/         # Generated LLVM IR files
-│   ├── output.ll        # LLVM IR output
-│   ├── output.s         # Assembly output (optional)
-│   └── output           # Executable (optional)
-└── Cargo.toml           # Project configuration
-```
-
 ## Building the Project
 
 ```bash
