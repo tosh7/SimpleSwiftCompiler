@@ -9,6 +9,8 @@ A simple Swift compiler implementation written in Rust. This project implements 
 - **LLVM Code Generator**: Generates LLVM IR from the AST
 - **Native Execution**: Compiles and executes code via LLVM toolchain
 - **Arithmetic Operations**: Supports basic math operations (+, -, *, /)
+- **Variable Declaration**: Support for `let` declarations with type inference
+- **Variable References**: Use declared variables in expressions
 - **Command-line Options**: Verbose mode for detailed compilation output
 
 ## Project Structure
@@ -26,7 +28,8 @@ simple-swift-compiler/
 │   ├── llvm_backend.rs  # LLVM backend implementation
 │   └── options.rs       # Compiler options and flags
 ├── example/
-│   └── Test.swift       # Example Swift code
+│   ├── ArithmeticOperators.swift  # Arithmetic operations example
+│   └── VariablesAssigment.swift   # Variable declaration example
 ├── target/llvm/         # Generated LLVM IR files
 │   ├── output.ll        # LLVM IR output
 │   ├── output.s         # Assembly output (optional)
@@ -70,81 +73,18 @@ This will:
 5. Save LLVM IR to `target/llvm/output.ll`
 6. Execute the code using LLVM toolchain (if installed)
 
-### Example Output
-
-For the input file `example/Test.swift`:
-```swift
-print(42)
-print(42+2)
-print(42-2)
-print(42*2)
-print(42/2)
-```
-
-The compiler outputs:
-```
-Source code:
-print(42)
-print(42+2)
-print(42-2)
-print(42*2)
-print(42/2)
-
-Tokens:
-0: Token { token_type: Print, lexeme: "print" }
-1: Token { token_type: LeftParen, lexeme: "(" }
-2: Token { token_type: Number, lexeme: "42" }
-...
-
-=== AST ===
-Program([
-    Print(Number(42)),
-    Print(Binary { left: Number(42), operator: Add, right: Number(2) }),
-    Print(Binary { left: Number(42), operator: Subtract, right: Number(2) }),
-    Print(Binary { left: Number(42), operator: Multiply, right: Number(2) }),
-    Print(Binary { left: Number(42), operator: Divide, right: Number(2) }),
-])
-
-=== LLVM IR ===
-; ModuleID = 'swift_module'
-source_filename = "swift_source"
-
-declare i32 @printf(i8*, ...)
-
-@.str = private unnamed_addr constant [4 x i8] c"%d\0A\00", align 1
-
-define i32 @main() {
-entry:
-  %1 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str, i32 0, i32 0), i32 42)
-  %2 = add i32 42, 2
-  %3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str, i32 0, i32 0), i32 %2)
-  %4 = sub i32 42, 2
-  %5 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str, i32 0, i32 0), i32 %4)
-  %6 = mul i32 42, 2
-  %7 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str, i32 0, i32 0), i32 %6)
-  %8 = sdiv i32 42, 2
-  %9 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str, i32 0, i32 0), i32 %8)
-  ret i32 0
-}
-
-=== LLVM IR saved to target/llvm/output.ll ===
-
-Execution result (with LLVM):
-42
-44
-40
-84
-21
-```
 
 ## Supported Features
 
 Currently, the compiler supports:
 - `print` statements
 - Integer literals
+- Variable declarations with `let`
+- Variable references in expressions
 - Arithmetic expressions (+, -, *, /)
 - Expression parsing with operator precedence
 - Abstract Syntax Tree (AST) generation
+- LLVM IR generation with stack allocation for variables
 
 ## Requirements
 
