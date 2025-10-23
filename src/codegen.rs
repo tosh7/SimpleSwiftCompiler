@@ -1,9 +1,11 @@
 use crate::ast::{AstNode, Statement, Expression, BinaryOperator};
+use std::collections::HashMap;
 
 pub struct LLVMCodeGenerator {
     output: String,
     indent_label: usize,
     next_register: i32,
+    variables: HashMap<String, String>
 }
 
 impl LLVMCodeGenerator {
@@ -12,6 +14,7 @@ impl LLVMCodeGenerator {
             output: String::new(),
             indent_label: 0,
             next_register: 1,
+            variables: HashMap::new(),
         }
     }
 
@@ -91,8 +94,21 @@ impl LLVMCodeGenerator {
                     call_reg, result_reg
                 ));
             }
-            Statement::VarDecl { name, value, is_mutable } => {
-                // TODO: Implement variable declaration
+            Statement::VarDecl { name, value, is_mutable: _ } => {
+                // Allocate stack space for the variable
+                let var_reg = self.alloc_register();
+                self.emit_indent();
+                self.emit(&format!("{} = alloca i32, align 4\n", var_reg));
+
+                // Store the variable register
+                self.variables.insert(name.clone(), var_reg.clone());
+
+                // Evaluate the value expression
+                let value_reg = self.visit_expression(value);
+
+                // Store the value in the allocated space
+                self.emit_indent();
+                self.emit(&format!("store i32 {}, i32* {}, align 4\n", value_reg, var_reg));
             }
             Statement::Assignment { name, value } => {
                 // TODO: Implement variable assignment
@@ -109,8 +125,19 @@ impl LLVMCodeGenerator {
                 n.to_string()
             }
             Expression::Variable(name) => {
-                // TODO: Implement variable reference properly
-                "".to_string()
+                // Look up the variable's register
+                if let Some(var_reg) = self.variables.get(name) {
+                    let var_reg = var_reg.clone();  // Clone to avoid borrow issues
+                    // Load the value from the variable's address
+                    let load_reg = self.alloc_register();
+                    self.emit_indent();
+                    self.emit(&format!("{} = load i32, i32* {}, align 4\n", load_reg, var_reg));
+                    load_reg
+                } else {
+                    // Variable not found - return a placeholder
+                    eprintln!("Error: Variable '{}' not found", name);
+                    "0".to_string()
+                }
             }
             Expression::Binary { left, operator, right } => {
                 let left_reg = self.visit_expression(left);
