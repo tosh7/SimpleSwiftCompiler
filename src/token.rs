@@ -10,6 +10,7 @@ pub enum TokenType {
     Star,
     Slash,
     Let,
+    Var,
     Assign, // =
     Colon, // :
     Identifier,

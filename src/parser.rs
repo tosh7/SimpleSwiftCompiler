@@ -67,6 +67,9 @@ impl Parser {
             TokenType::Let => {
                 self.parse_declaration()
             }
+            TokenType::Var => {
+                self.parse_declaration()
+            }
             _ => {
                 Err("Unexpected token in statement".to_string())
             }
@@ -74,7 +77,16 @@ impl Parser {
     }
 
     fn parse_declaration(&mut self) -> Result<Statement, String> {
-        self.consume(TokenType::Let, "Expected 'let' keyword")?;
+        // Check if it's 'let' or 'var'
+        let is_mutable = if self.check(TokenType::Let) {
+            self.advance();
+            false
+        } else if self.check(TokenType::Var) {
+            self.advance();
+            true
+        } else {
+            return Err("Expected 'let' or 'var' keyword".to_string());
+        };
 
         // Get variable name
         let name_token = self.consume(TokenType::Identifier, "Expected variable name")?;
@@ -88,7 +100,6 @@ impl Parser {
                 self.advance(); // consume type name
             }
         }
-
         // Expect assignment
         self.consume(TokenType::Assign, "Expected '=' in variable declaration")?;
 
@@ -98,7 +109,7 @@ impl Parser {
         Ok(Statement::VarDecl {
             name,
             value,
-            is_mutable: false,  // 'let' is immutable
+            is_mutable,
         })
     }
 

@@ -125,6 +125,9 @@ impl Lexer {
                         "let" => {
                             Ok(Token::new(TokenType::Let, identifier))
                         }
+                        "var" => {
+                            Ok(Token::new(TokenType::Var, identifier))
+                        }
                         _ => {
                             Ok(Token::new(TokenType::Identifier, identifier))
                         }
