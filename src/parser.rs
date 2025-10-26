@@ -70,12 +70,28 @@ impl Parser {
             TokenType::Var => {
                 self.parse_declaration()
             }
+            TokenType::Identifier => {
+                self.parse_assignment()
+            }
             _ => {
                 Err("Unexpected token in statement".to_string())
             }
         }
     }
 
+    fn parse_assignment(&mut self) -> Result<Statement, String> {
+        let name_token = self.consume(TokenType::Identifier, "Expected variable name")?;
+        let name = name_token.lexeme;
+        self.consume(TokenType::Assign, "Expected '=' in variable declaration")?;
+
+        // Parse the value expression
+        let value = self.parse_expression()?;
+        Ok(Statement::Assignment {
+            name,
+            value,
+        })
+    }
+    
     fn parse_declaration(&mut self) -> Result<Statement, String> {
         // Check if it's 'let' or 'var'
         let is_mutable = if self.check(TokenType::Let) {
