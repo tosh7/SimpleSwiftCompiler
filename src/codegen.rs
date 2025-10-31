@@ -111,7 +111,16 @@ impl LLVMCodeGenerator {
                 self.emit(&format!("store i32 {}, i32* {}, align 4\n", value_reg, var_reg));
             }
             Statement::Assignment { name, value } => {
-                // TODO: Implement variable assignment
+                // Look up the variable's allocated register
+                if let Some(var_reg) = self.variables.get(name) {
+                    let var_reg = var_reg.clone();
+                    let value_reg = self.visit_expression(value);
+
+                    self.emit_indent();
+                    self.emit(&format!("store i32 {}, i32* {}, align 4\n", value_reg, var_reg));
+                } else {
+                    eprintln!("Error: Variable '{}' not found for assignment", name);
+                }
             }
             Statement::Expression(expr) => {
                 // TODO
